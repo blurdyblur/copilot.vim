@@ -1,0 +1,104 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  isGuest   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  subscription Subscription?
+  settings     UserSettings?
+  analytics    Analytics[]
+}
+
+model SpeedCamera {
+  id          String   @id @default(cuid())
+  latitude    Float
+  longitude   Float
+  type        CameraType
+  speedLimit  Int?
+  verifiedAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([latitude, longitude])
+}
+
+model Subscription {
+  id                String           @id @default(cuid())
+  userId            String           @unique
+  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stripeCustomerId  String           @unique
+  stripeSubId       String           @unique
+  status            SubscriptionStatus
+  planType          PlanType
+  currentPeriodEnd  DateTime
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+}
+
+model UserSettings {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  alertDistance   Int      @default(500) // meters
+  alertSound      Boolean  @default(true)
+  speedUnit       SpeedUnit @default(MPH)
+  disclaimerAccepted Boolean @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Analytics {
+  id              String        @id @default(cuid())
+  userId          String?
+  user            User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  eventType       AnalyticsEvent
+  metadata        String?       // JSON string for additional data
+  createdAt       DateTime      @default(now())
+  
+  @@index([eventType, createdAt])
+}
+
+enum CameraType {
+  FIXED_SPEED
+  RED_LIGHT
+  AVERAGE_SPEED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+  UNPAID
+  INCOMPLETE
+}
+
+enum PlanType {
+  FREE
+  PREMIUM
+}
+
+enum SpeedUnit {
+  MPH
+  KMH
+}
+
+enum AnalyticsEvent {
+  APP_OPENED
+  DRIVING_SESSION_STARTED
+  ALERT_TRIGGERED
+  SUBSCRIPTION_STARTED
+  SUBSCRIPTION_CANCELED
+}
