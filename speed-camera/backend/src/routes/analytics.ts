@@ -1,12 +1,13 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
+import { analyticsLimiter } from '../middleware/rateLimiter.js';
 
 const router = express.Router();
 const prisma = new PrismaClient();
 
 // Track analytics event
-router.post('/track', authMiddleware, async (req: AuthRequest, res) => {
+router.post('/track', authMiddleware, analyticsLimiter, async (req: AuthRequest, res) => {
   try {
     const { eventType, metadata } = req.body;
 

@@ -2,6 +2,7 @@ import express from 'express';
 import Stripe from 'stripe';
 import { PrismaClient } from '@prisma/client';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
+import { paymentLimiter, generalLimiter } from '../middleware/rateLimiter.js';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -10,7 +11,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
 });
 
 // Create checkout session
-router.post('/create-checkout', authMiddleware, async (req: AuthRequest, res) => {
+router.post('/create-checkout', authMiddleware, paymentLimiter, async (req: AuthRequest, res) => {
   try {
     if (req.isGuest) {
       return res.status(403).json({ error: 'Guest users cannot subscribe' });
@@ -66,7 +67,7 @@ router.post('/create-checkout', authMiddleware, async (req: AuthRequest, res) =>
 });
 
 // Get subscription status
-router.get('/status', authMiddleware, async (req: AuthRequest, res) => {
+router.get('/status', authMiddleware, generalLimiter, async (req: AuthRequest, res) => {
   try {
     const subscription = await prisma.subscription.findUnique({
       where: { userId: req.userId }
@@ -195,7 +196,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
 });
 
 // Cancel subscription
-router.post('/cancel', authMiddleware, async (req: AuthRequest, res) => {
+router.post('/cancel', authMiddleware, paymentLimiter, async (req: AuthRequest, res) => {
   try {
     const subscription = await prisma.subscription.findUnique({
       where: { userId: req.userId }

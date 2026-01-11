@@ -1,12 +1,13 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
+import { generalLimiter } from '../middleware/rateLimiter.js';
 
 const router = express.Router();
 const prisma = new PrismaClient();
 
 // Get cameras within bounding box
-router.get('/', authMiddleware, async (req: AuthRequest, res) => {
+router.get('/', authMiddleware, generalLimiter, async (req: AuthRequest, res) => {
   try {
     const { minLat, maxLat, minLng, maxLng } = req.query;
 
@@ -35,7 +36,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
 });
 
 // Get camera by ID
-router.get('/:id', authMiddleware, async (req: AuthRequest, res) => {
+router.get('/:id', authMiddleware, generalLimiter, async (req: AuthRequest, res) => {
   try {
     const cameraId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
     const camera = await prisma.speedCamera.findUnique({

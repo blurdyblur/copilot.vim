@@ -1,12 +1,13 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
+import { generalLimiter } from '../middleware/rateLimiter.js';
 
 const router = express.Router();
 const prisma = new PrismaClient();
 
 // Get user settings
-router.get('/', authMiddleware, async (req: AuthRequest, res) => {
+router.get('/', authMiddleware, generalLimiter, async (req: AuthRequest, res) => {
   try {
     const settings = await prisma.userSettings.findUnique({
       where: { userId: req.userId }
@@ -24,7 +25,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
 });
 
 // Update user settings
-router.put('/', authMiddleware, async (req: AuthRequest, res) => {
+router.put('/', authMiddleware, generalLimiter, async (req: AuthRequest, res) => {
   try {
     const { alertDistance, alertSound, speedUnit, disclaimerAccepted } = req.body;
 
