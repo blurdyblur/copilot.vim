@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { UserSettings, Subscription } from '../types';
+import type { UserSettings, Subscription } from '../types';
 import api from '../utils/api';
 
 const SettingsPage: React.FC = () => {

@@ -6,7 +6,7 @@ import { authMiddleware, AuthRequest } from '../middleware/auth.js';
 const router = express.Router();
 const prisma = new PrismaClient();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-01-27.acacia'
+  apiVersion: '2025-12-15.clover'
 });
 
 // Create checkout session
@@ -110,7 +110,8 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
         const subscriptionId = session.subscription as string;
 
         if (userId && subscriptionId) {
-          const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+          const stripeSubscription = await stripe.subscriptions.retrieve(subscriptionId);
+          const periodEnd = (stripeSubscription as any).current_period_end || Date.now() / 1000;
           
           await prisma.subscription.upsert({
             where: { userId },
@@ -118,7 +119,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
               stripeSubId: subscriptionId,
               status: 'ACTIVE',
               planType: 'PREMIUM',
-              currentPeriodEnd: new Date(subscription.current_period_end * 1000)
+              currentPeriodEnd: new Date(periodEnd * 1000)
             },
             create: {
               userId,
@@ -126,7 +127,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
               stripeSubId: subscriptionId,
               status: 'ACTIVE',
               planType: 'PREMIUM',
-              currentPeriodEnd: new Date(subscription.current_period_end * 1000)
+              currentPeriodEnd: new Date(periodEnd * 1000)
             }
           });
 
@@ -142,7 +143,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
       }
 
       case 'customer.subscription.updated': {
-        const subscription = event.data.object as Stripe.Subscription;
+        const subscription = event.data.object as any;
         const userId = subscription.metadata?.userId;
 
         if (userId) {

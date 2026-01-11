@@ -37,8 +37,9 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
 // Get camera by ID
 router.get('/:id', authMiddleware, async (req: AuthRequest, res) => {
   try {
+    const cameraId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
     const camera = await prisma.speedCamera.findUnique({
-      where: { id: req.params.id }
+      where: { id: cameraId }
     });
 
     if (!camera) {

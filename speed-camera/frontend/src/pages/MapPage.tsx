@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
-import { SpeedCamera, UserSettings, Subscription } from '../types';
+import type { SpeedCamera, UserSettings, Subscription } from '../types';
 import api from '../utils/api';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -124,6 +124,8 @@ const MapPage: React.FC = () => {
     if (!map.current) return;
 
     const bounds = map.current.getBounds();
+    if (!bounds) return;
+    
     try {
       const response = await api.get('/cameras', {
         params: {
