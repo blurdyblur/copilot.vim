@@ -5,10 +5,11 @@ import api from '../utils/api';
 const DisclaimerPage: React.FC = () => {
   const navigate = useNavigate();
   const [accepted, setAccepted] = useState(false);
+  const [showError, setShowError] = useState(false);
 
   const handleAccept = async () => {
     if (!accepted) {
-      alert('Please accept the terms to continue');
+      setShowError(true);
       return;
     }
 
@@ -53,12 +54,21 @@ const DisclaimerPage: React.FC = () => {
           </p>
         </div>
 
+        {showError && !accepted && (
+          <div className="bg-red-600 text-white p-3 rounded mb-4">
+            Please accept the terms to continue
+          </div>
+        )}
+
         <div className="flex items-center mb-6">
           <input
             type="checkbox"
             id="accept"
             checked={accepted}
-            onChange={(e) => setAccepted(e.target.checked)}
+            onChange={(e) => {
+              setAccepted(e.target.checked);
+              if (e.target.checked) setShowError(false);
+            }}
             className="w-6 h-6 mr-3 cursor-pointer"
           />
           <label htmlFor="accept" className="text-lg cursor-pointer">

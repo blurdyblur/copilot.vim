@@ -99,7 +99,13 @@ cp .env.example .env
 # Add your Mapbox token to .env
 ```
 
-4. Start the development server:
+4. (Optional) Add an alert sound:
+```bash
+# Place an alert.mp3 file in the public directory for audio alerts
+# If not provided, audio alerts will fail silently
+```
+
+5. Start the development server:
 ```bash
 npm run dev
 ```

@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import mapboxgl from 'mapbox-gl';
 import type { SpeedCamera, UserSettings, Subscription } from '../types';
 import api from '../utils/api';
@@ -8,6 +9,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || '';
 
 const MapPage: React.FC = () => {
+  const navigate = useNavigate();
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [isDriving, setIsDriving] = useState(false);
@@ -311,7 +313,7 @@ const MapPage: React.FC = () => {
       {/* Top Menu Button */}
       <div className="absolute top-4 right-4 z-40">
         <button
-          onClick={() => window.location.href = '/settings'}
+          onClick={() => navigate('/settings')}
           className="bg-gray-800 hover:bg-gray-700 text-white p-4 rounded-full shadow-lg"
         >
           ⚙️
